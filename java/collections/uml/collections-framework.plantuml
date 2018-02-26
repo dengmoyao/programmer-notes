@@ -1,0 +1,65 @@
+@startuml java-collections-framework
+
+' author: tomoya deng
+
+package java.util {
+    interface Collection
+    abstract class AbstractCollection
+
+    ' List family
+    interface List
+    abstract class AbstractList
+    class ArrayList
+    abstract class AbstractSequentialList
+    class LinkedList
+
+    Collection <|-- List
+    Collection <|.. AbstractCollection
+    AbstractCollection <|-- AbstractList
+    List <|.. AbstractList
+    AbstractList <|-- ArrayList
+    AbstractList <|-- AbstractSequentialList
+    AbstractSequentialList <|-- LinkedList
+
+    ' Queue family
+    interface Queue
+    interface Deque
+    Collection <|-- Queue
+    Queue <|-- Deque
+    Deque <|.. LinkedList
+
+
+    ' Set family
+    interface Set
+    interface SortedSet
+    abstract class AbstractSet
+    class TreeSet
+    class HashSet
+    class LinkedHashSet
+
+    Collection <|-- Set
+    Set <|-- SortedSet
+    Set <|.. AbstractSet
+    AbstractSet <|-- TreeSet
+    AbstractSet <|-- HashSet
+    SortedSet <|.. TreeSet
+    HashSet <|-- LinkedHashSet
+
+
+    ' Map family
+    interface Map
+    abstract class AbstractMap
+    interface SortedMap
+    class HashMap
+    class TreeMap
+    class LinkedHashMap
+
+    Map <|.. AbstractMap
+    Map <|-- SortedMap
+    AbstractMap <|-- HashMap
+    AbstractMap <|-- TreeMap
+    SortedMap <|.. TreeMap
+    HashMap <|-- LinkedHashMap
+}
+
+@enduml
