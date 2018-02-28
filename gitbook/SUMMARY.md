@@ -17,7 +17,7 @@
 
 * [编程思想]()
     * [设计模式]()
-        * [适配器模式](concept/designPattern/Apapter.md)
+        * [适配器模式](concept/designPattern/Adapter.md)
         * [装饰器模式](concept/designPattern/Decorator.md)
 
 * [TO-DO LIST](TODO.md)
