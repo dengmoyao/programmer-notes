@@ -87,8 +87,9 @@ public interrupt()
 
 `sleep()`是Thread的静态方法，调用此方法会让当前线程暂停指定的时间，让出CPU，但是会继续持有对象的锁，休眠结束后自动恢复执行。`wait()`是Object的实例方法，调用对象的`wait()`会使当前线程放弃对象的锁，进入对象等待池，只有其他线程调用了该对象的`notify()`或者`notifyAll()`时，才能唤醒等待池中的线程进入等锁池，若线程重新获取到对象锁就可以继续执行。(参考上面的状态转换图)
 
-
-## 参考资料
+## 参考资料&扩展阅读
 
 + [Java Thread States and Life Cycle](https://www.uml-diagrams.org/java-thread-uml-state-machine-diagram-example.html)
 + [《Java并发编程的艺术》方腾飞,魏鹏,程晓明 著. ](https://www.amazon.cn/dp/B012NDCEA0/ref=sr_1_1?ie=UTF8&qid=1520002234&sr=8-1&keywords=Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E8%89%BA%E6%9C%AF)
+
++ [Java 线程简介，Brain Goetz](https://www.ibm.com/developerworks/cn/education/java/j-threads/j-threads.html)

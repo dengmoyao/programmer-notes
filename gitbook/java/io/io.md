@@ -46,6 +46,12 @@ __类图__
 
 ![](./img/OutputStreamWriter.jpg)
 
+```java
+BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+```
+
+上面这行代码就同时体现了Java I/O中的适配器和装饰器
+
 ## 磁盘I/O
 
 ### File
@@ -63,16 +69,16 @@ __类图__
 
 ## 常见问题
 
-### Java I/O 中的设计模式
+### Java I/O 中的设计模式？
 
 + 装饰器模式
 + 适配器模式
 
-适配器模式和装饰器模式差别： 
+PS: 适配器模式和装饰器模式差别： 
 
 + 适配器模式是将一个接口转变成另一个接口，它的目的是通过改变接口来达到重复使用的目的；
 + 装饰器模式是不改变被装饰对象的接口，只是增强原有对象的功能。
 
-## 参考资料
+## 参考资料&扩展阅读
 
 [深入分析 Java I/O 的工作机制](https://www.ibm.com/developerworks/cn/java/j-lo-javaio/)
