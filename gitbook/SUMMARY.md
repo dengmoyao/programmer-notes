@@ -14,6 +14,7 @@
 
 * [数据结构与算法]()
     * [基础数据结构]()
+        * [链表](dsa/ds/linkedList.md)
         * [栈和队列](dsa/ds/stack_queue.md)
 
 * [框架&工具]()
