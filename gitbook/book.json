@@ -1,5 +1,7 @@
 {
+    "title": "programmer-notes",
     "plugins": [
+        "github",
         "todo",
         "search-plus",
         "-search",
@@ -11,6 +13,7 @@
         "theme-comscore",
         "emphasize",
         "splitter",
+        "expandable-chapters",
         "katex",
         "anchor-navigation-ex",
         "mermaid-gb3",
@@ -25,6 +28,9 @@
         },
         "disqus": {
             "shortName": "tomoya-book"
+        },
+        "github": {
+            "url": "https://github.com/dengmoyao/programmer-notes"
         }
     }
 }
