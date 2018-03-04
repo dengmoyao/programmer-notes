@@ -2,7 +2,7 @@
 
 ## 基本概念
 
-线程，也称为轻量级进程，是现在操作系统调度的最小单元。每个线程拥有各自的堆栈、程序计数器和局部变量。但是，与分隔的进程相比，线程共享内存、文件句柄和其它每个进程应有的状态。
+线程，也称为轻量级进程，是现在操作系统调度的最小单元。每个线程拥有各自的方法栈、程序计数器和局部变量。但是，与分隔的进程相比，线程共享内存、文件句柄和其它每个进程应有的状态。
 
 ## Java多线程优势
 
@@ -91,5 +91,4 @@ public interrupt()
 
 + [Java Thread States and Life Cycle](https://www.uml-diagrams.org/java-thread-uml-state-machine-diagram-example.html)
 + [《Java并发编程的艺术》方腾飞,魏鹏,程晓明 著. ](https://www.amazon.cn/dp/B012NDCEA0/ref=sr_1_1?ie=UTF8&qid=1520002234&sr=8-1&keywords=Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E8%89%BA%E6%9C%AF)
-
 + [Java 线程简介，Brain Goetz](https://www.ibm.com/developerworks/cn/education/java/j-threads/j-threads.html)
