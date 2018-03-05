@@ -441,3 +441,22 @@ public E get(int index) {
 
 + ListItr
 + ArrayListSpliterator
+
+
+## LinkedList
+
+### 继承关系
+
+```java
+public class LinkedList<E>
+    extends AbstractSequentialList<E>
+    implements List<E>, Deque<E>, Cloneable, java.io.Serializable {}
+```
+
++ `AbstractSequentialList`继承自`AbstractList`，提供了通过索引访问队列的API
++ `LinkedList`实现了`Deque`接口，能将LinkedList当作双端队列使用
+
+
+在`LinkedList`中除了本身自己的方法外，还提供了一些可以使其作为栈、队列或者双端队列的方法。这些方法可能彼此之间只是名字不同，以使得这些名字在特定的环境中显得更加合适。
+
+`LinkedList`实际上就是采用[双向链表](../../dsa/ds/linkedList.md)来实现的。
