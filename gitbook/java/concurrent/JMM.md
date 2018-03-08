@@ -63,3 +63,10 @@ Happens-before规则包括：
 + Future表示的任务的所有操作Happens-Before Future#get()操作
 + 向Executor提交一个Runnable或Callable的操作Happens-Before任务开始执行操作
 + 一个线程到达CyclicBarrier或Exchanger的操作将在其他到达该栅栏或交换点的线程被释放之前执行。
+
+
+## 参考资料
+
++ [Java内存访问重排序的研究](https://tech.meituan.com/java-memory-reordering.html)
++ [《Java并发编程的艺术》方腾飞,魏鹏,程晓明 著. ](https://www.amazon.cn/dp/B012NDCEA0/ref=sr_1_1?ie=UTF8&qid=1520002234&sr=8-1&keywords=Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E8%89%BA%E6%9C%AF)
++ [《深入理解Java虚拟机:JVM高级特性与最佳实践(第2版)》，周志明著](https://www.amazon.cn/gp/product/B00D2ID4PK/ref=pd_bxgy_14_img_2?ie=UTF8&psc=1&refRID=K62CDWYDMVM80WXKTYQ4)
