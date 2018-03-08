@@ -44,7 +44,7 @@ Java内存模型是通过各种操作来定义的，包括对变量的读/写操
 >
     在JMM中，如果一个操作执行的结果需要对另一个操作可见，那么这两个操作之间必须存在happens-before关系。
 
-Happens-before规则包括：
+Happens-before的前后两个操作不会被重排序且后者对前者的内存可见。Happens-before规则包括：
 
 + 程序次序规则： 线程中的每个动作A都happens-before于该线程中的每一个动作B，其中，在程序中，所有的动作B都能出现在A之后。
 + 监视器锁规则： 对一个监视器锁的解锁 happens-before于每一个后续对同一监视器锁的加锁。
@@ -64,6 +64,15 @@ Happens-before规则包括：
 + 向Executor提交一个Runnable或Callable的操作Happens-Before任务开始执行操作
 + 一个线程到达CyclicBarrier或Exchanger的操作将在其他到达该栅栏或交换点的线程被释放之前执行。
 
+
+Java内存模型关于重排序规定的总结：
+
+|是否允许重排序|第二项操作|||
+|---|---|---|---|
+|第一项操作|普通读<br>普通写|volatile读<br>同步块入口|volatile写<br>同步块出口|
+|普通读<br>普通写|||不允许|
+|volatile读<br>同步块入口|不允许|不允许|不允许|
+|volatile写<br>同步块出口||不允许|不允许|
 
 ## 参考资料
 

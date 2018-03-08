@@ -14,8 +14,9 @@
 
 #### 并发
 - [x] 线程
-- [ ] JMM
-- [ ] 锁
+- [X] JMM
+- [ ] synchronized与volatile
+- [ ] 显示锁
 - [ ] 并发容器和工具类
 - [ ] 原子操作类
 - [ ] 线程池和Excutor框架
