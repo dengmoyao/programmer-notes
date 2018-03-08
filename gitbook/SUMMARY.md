@@ -8,6 +8,7 @@
         * [List](java/collections/List.md)
     * [并发]()
         * [线程](java/concurrent/Thread.md)
+        * [Java内存模型(JMM)](java/concurrent/JMM.md)
     * [JVM]()
         * [JVM内存区域](java/jvm/Mem.md)
         * [类文件结构](java/jvm/ClassFile.md)

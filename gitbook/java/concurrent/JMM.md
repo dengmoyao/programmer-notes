@@ -6,6 +6,8 @@ Java内存模型（Java Memory Model, JMM）是一种Java虚拟机规范，用�
 
 从抽象的角度来看，JMM定义了线程和主内存之间的抽象关系：
 
+![](img/JMM_thread.png)
+
 + 线程之间的共享变量存储在主内存（Main Memory）中
 + 每个线程都有一个私有的本地内存（Local Memory），本地内存中存储了该线程已读/写共享变量的拷贝副本。本地内存是JMM的一个抽象概念，并不真实存在，它涵盖了缓存、写缓冲区、寄存器以及其他的硬件和编译器优化。
 
@@ -60,4 +62,4 @@ Happens-before规则包括：
 + 释放Semaphore许可的操作Happens-Before获得许可操作
 + Future表示的任务的所有操作Happens-Before Future#get()操作
 + 向Executor提交一个Runnable或Callable的操作Happens-Before任务开始执行操作
-+ 将一个元素放入一个线程安全的队列的操作Happens-Before从队列中取出这个元素的操作
++ 一个线程到达CyclicBarrier或Exchanger的操作将在其他到达该栅栏或交换点的线程被释放之前执行。
