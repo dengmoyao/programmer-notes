@@ -18,6 +18,7 @@
     * [基础数据结构]()
         * [链表](dsa/ds/linkedList.md)
         * [栈和队列](dsa/ds/stack_queue.md)
+        * [树](dsa/ds/tree.md)
 
 * [框架&工具]()
     * [Spring]()
