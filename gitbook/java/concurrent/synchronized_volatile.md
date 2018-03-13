@@ -32,6 +32,33 @@ volatile的内存可见性是由[Java内存模型(JMM)](JMM.md)保证的，JMM�
 
 此外Brian Goetz还给出了几种正确使用volatile的模式： [正确使用 Volatile 变量](https://www.ibm.com/developerworks/cn/java/j-jtp06197.html)
 
+## synchronized
+
+synchronized 是最常使用的同步手段，主要有如下三种形式：
+
++ 对于普通同步方法，锁是当前实例对象
++ 对于静态同步方法，锁是当前类的Class对象
++ 对于同步代码块，锁是synchronized括号内配置的对象
+
+对于synchronized 代码块，当Java源代码被javac编译成字节码的时候，会在同步块的入口位置和退出位置分别插入monitorenter和monitorexit字节码指令。对于同步方法，在编译生成的Class文件的方法表中会将该方法的access_flags字段中的synchronized标志位置1。
+
+### Java对象头
+
+synchronized 使用的锁是存在Java对象头中的。对象头主要包括两部分数据：
+
++ Mark Work（标记字段）： 存储对象的hashcode或者锁信息等
++ Klass Pointer（类型指针）： 类元数据的指针，虚拟机根据这个指针来确定这个对象是哪个类的实例
++ Array length（数组长度）： 如果当前对象是数组，会多4个字节来存储数组长度
+
+Mark Word用于存储对象自身的运行时数据，如HashCode、GC分代年龄、锁状态标志、线程持有的锁、偏向线程 ID、偏向时间戳等等，在运行期间，Mark Word里存储的数据会随着锁标志位的变化而变化
+
+![](img/mark_word_1.png)
+
+![](img/mark_word_2.png)
+
+
+
 ## 参考资料
 
 + [正确使用 Volatile 变量，Brian Goetz](https://www.ibm.com/developerworks/cn/java/j-jtp06197.html)
++ [《Java并发编程的艺术》方腾飞,魏鹏,程晓明 著. ](https://www.amazon.cn/dp/B012NDCEA0/ref=sr_1_1?ie=UTF8&qid=1520002234&sr=8-1&keywords=Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%9A%84%E8%89%BA%E6%9C%AF)
