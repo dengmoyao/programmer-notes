@@ -56,6 +56,46 @@ Mark Word用于存储对象自身的运行时数据，如HashCode、GC分代年�
 
 ![](img/mark_word_2.png)
 
+### Monitor
+
+在JVM内部，无论是同步方法还是同步代码块，无论是ACC_SYNCHRONIZED还是monitorenter、monitorexit都是基于Monitor实现的。
+
+在Java虚拟机(HotSpot)中，Monitor是基于C++实现的，主要数据结构如下：
+
+```cpp
+  ObjectMonitor() {
+    _header       = NULL;
+    _count        = 0;
+    _waiters      = 0,
+    _recursions   = 0;
+    _object       = NULL;
+    _owner        = NULL;
+    _WaitSet      = NULL;
+    _WaitSetLock  = 0 ;
+    _Responsible  = NULL ;
+    _succ         = NULL ;
+    _cxq          = NULL ;
+    FreeNext      = NULL ;
+    _EntryList    = NULL ;
+    _SpinFreq     = 0 ;
+    _SpinClock    = 0 ;
+    OwnerIsThread = 0 ;
+    _previous_owner_tid = 0;
+  }
+```
+
+__关键字段__
+
++ _owner: 指向持有ObjectMonitor对象的线程
++ _WaitSet: 存放处于wait状态的线程队列
++ _EntryList: 存放处于等待锁block状态的线程队列
++ _recursions: 锁的重入次数
++ _count：用来记录该线程获取锁的次数
+
+[源码地址](http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/runtime/objectMonitor.hpp#l140)
+
+
+关于Monitor的详细介绍，请参考[Moniter的实现原理](http://www.hollischuang.com/archives/2030)
 
 
 ## 参考资料
