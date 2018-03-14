@@ -8,14 +8,14 @@
 
 #### 集合
 - [x] Java集合框架概述
-- [ ] List
+- [x] List
 - [ ] Map
 - [ ] Set
 
 #### 并发
 - [x] 线程
-- [X] JMM
-- [ ] synchronized与volatile
+- [x] JMM
+- [x] synchronized与volatile
 - [ ] 显示锁
 - [ ] 并发容器和工具类
 - [ ] 原子操作类
