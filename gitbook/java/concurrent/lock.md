@@ -153,3 +153,234 @@ private volatile int state;
 
 ### 同步状态获取和释放
 
+#### 独占式同步状态获取
+
+通过调用同步器的`acquire(int arg)`方法可以获取同步状态，该方法主要完成了同步状态的获取、结点构造，加入同步队列以及在同步队列中自旋等待的相关工作
+
+```java
+public final void acquire(int arg) {
+    if (!tryAcquire(arg) &&
+        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        selfInterrupt();
+}
+```
+
+1. 首先尝试获取锁（`tryAcquire(arg`)的具体实现定义在了子类中），如果获取到，则执行完毕；否则进行步骤2
+2. 通过`addWaiter(Node.EXCLUSIVE)`方法将当前线程包装成独占模式结点加入到CLH队列队尾，
+3. 最后调用`acquireQueued(Node node, int arg)`方法，使得该结点以“死循环”的方式获取同步状态；如果获取不到则阻塞结点中的线程，而被阻塞线程的唤醒主要依靠前驱结点的出列或着阻塞线程被中断来实现
+
+__结点构造和加入同步队列__
+
+```java
+private Node addWaiter(Node mode) {
+    //把当前线程包装为node,设为独占模式
+    Node node = new Node(Thread.currentThread(), mode);
+    // 快速尝试添加尾结点
+    Node pred = tail;
+    if (pred != null) {
+        node.prev = pred;
+        // CAS设置尾结点
+        if (compareAndSetTail(pred, node)) {
+            pred.next = node;
+            return node;
+        }
+    }
+    // 多次尝试
+    enq(node);
+    return node;
+}
+
+private Node enq(final Node node) {
+    // 循环尝试，直到入列成功
+    for (;;) {
+        Node t = tail;
+        // tail不存在，设置为首结点
+        if (t == null) { // Must initialize
+            if (compareAndSetHead(new Node()))
+                tail = head;
+        } else {
+            // 设置尾结点
+            node.prev = t;
+            if (compareAndSetTail(t, node)) {
+                t.next = node;
+                return t;
+            }
+        }
+    }
+}
+```
+
+__acquireQueued自旋获取同步状态__
+
+结点进入同步队列中后，就进入了一个自旋过程，每个结点（或者说每个线程）都在自省地观察，当条件满足，获取到了同步状态，就可以从这个自旋过程中退出，否则依旧留在这个自旋过程中（并会阻塞结点地线程）
+
+```java
+final boolean acquireQueued(final Node node, int arg) {
+    boolean failed = true;
+    try {
+        //中断标志
+        boolean interrupted = false;
+        /** 自旋过程，其实就是一个死循环而已 */
+        for (;;) {
+            //当前线程的前驱节点
+            final Node p = node.predecessor();
+            //当前线程的前驱节点是头结点，且同步状态成功
+            if (p == head && tryAcquire(arg)) {
+                setHead(node);
+                p.next = null; // help GC
+                failed = false;
+                return interrupted;
+            }
+            //获取失败，则判断是否应该挂起,而这个判断则得通过它的前驱节点的waitStatus来确定--具体后面介绍
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                    parkAndCheckInterrupt())
+                interrupted = true;
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+
+private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
+    int ws = pred.waitStatus;
+    if (ws == Node.SIGNAL)
+        /*
+        * SIGNAL,则返回true表示应该挂起当前线程,挂起该线程,并等待被唤醒,
+        * 被唤醒后进行中断检测,如果发现当前线程被中断，那么抛出InterruptedException并退出循环
+        */
+        return true;
+    if (ws > 0) {
+        // >0, 将前驱节点踢出队列,返回false（循环地将ws大于0地前驱结点都踢出队列）
+        do {
+            node.prev = pred = pred.prev;
+        } while (pred.waitStatus > 0);
+        pred.next = node;
+    } else {
+        // <0,也是返回false,不过先将前驱节点waitStatus设置为SIGNAL,使得下次判断时,将当前节点挂起
+        compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
+    }
+    return false;
+}
+
+private final boolean parkAndCheckInterrupt() {
+    LockSupport.park(this); // 阻塞线程
+    return Thread.interrupted(); // 检查中断
+}
+```
+
+#### 独占式同步状态释放
+
+当前线程获取同步状态并执行了相应地逻辑之后，就需要释放同步状态，使得后续的结点能够继续地获取同步状态。通过调用同步器地`release(int arg)`方法可以释放同步状态，该方法在释放了同步状态之后，会唤醒器后继结点（进而使后继结点重新尝试获取同步状态）
+
+```java
+public final boolean release(int arg) {
+    // 首先调用子类的tryRelease()方法释放锁
+    if (tryRelease(arg)) {
+        Node h = head;
+        if (h != null && h.waitStatus != 0)
+            unparkSuccessor(h); // 然后唤醒后继节点
+        return true;
+    }
+    return false;
+}
+
+private void unparkSuccessor(Node node) {
+    int ws = node.waitStatus;
+    // 如果当前状态 < 0 则设置为 0
+    if (ws < 0)
+        compareAndSetWaitStatus(node, ws, 0);
+
+    /*
+    * 如果node的后继节点不为空且不是作废状态,则唤醒这个后继节点,
+    * 否则从末尾开始寻找合适的节点,如果找到,则唤醒
+    */
+    Node s = node.next;
+    if (s == null || s.waitStatus > 0) {
+        s = null;
+        for (Node t = tail; t != null && t != node; t = t.prev)
+            if (t.waitStatus <= 0)
+                s = t;
+    }
+    if (s != null)
+        LockSupport.unpark(s.thread);
+}
+```
+
+#### 共享式同步状态获取
+
+共享式获取与独占式获取主要的区别在于同一时刻能否有多个线程同时获取到同步状态。AQS提供`acquireShared(int arg)`方法共享式获取同步状态：
+
+```java
+public final void acquireShared(int arg) {
+    if (tryAcquireShared(arg) < 0) // 共享式获取同步状态的标志是返回 >= 0 的值表示获取成功
+        //获取失败，自旋获取同步状态
+        doAcquireShared(arg);
+}
+
+private void doAcquireShared(int arg) {
+    // 共享式节点
+    final Node node = addWaiter(Node.SHARED);
+    boolean failed = true;
+    try {
+        boolean interrupted = false;
+        for (;;) {
+            //前驱节点
+            final Node p = node.predecessor();
+            //如果其前驱节点为头节点，尝试获取同步状态
+            if (p == head) {
+                //尝试获取同步
+                int r = tryAcquireShared(arg);
+                if (r >= 0) {
+                    setHeadAndPropagate(node, r);
+                    p.next = null; // help GC
+                    if (interrupted)
+                        selfInterrupt();
+                    failed = false;
+                    return;
+                }
+            }
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                    parkAndCheckInterrupt())
+                interrupted = true;
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+
+#### 共享式同步状态释放
+
+通过调用`releaseShared(int arg)`方法可以释放同步状态：
+
+```java
+public final boolean releaseShared(int arg) {
+    if (tryReleaseShared(arg)) {
+        doReleaseShared();
+        return true;
+    }
+    return false;
+}
+
+private void doReleaseShared() {
+    // 为确保同步状态线程安全释放，通过循环和CAS来保证（因为释放同步状态的操作会同时来自多个线程）
+    for (;;) {
+        Node h = head;
+        if (h != null && h != tail) {
+            int ws = h.waitStatus;
+            if (ws == Node.SIGNAL) {
+                if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))
+                    continue;            // loop to recheck cases
+                unparkSuccessor(h);
+            }
+            else if (ws == 0 &&
+                        !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
+                continue;                // loop on failed CAS
+        }
+        if (h == head)                   // loop if head changed
+            break;
+    }
+}
+```
