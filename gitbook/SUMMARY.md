@@ -6,6 +6,7 @@
     * [集合框架]()
         * [集合框架概述](java/collections/brief.md)
         * [List](java/collections/List.md)
+        * [Map](java/collections/Map.md)
     * [并发]()
         * [线程](java/concurrent/Thread.md)
         * [Java内存模型(JMM)](java/concurrent/JMM.md)
