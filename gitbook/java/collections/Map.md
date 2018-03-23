@@ -300,3 +300,115 @@ default V merge(K key, V value,
     return newValue;
 }
 ```
+
+### Map的实现类对比
+
+Map接口常用的实现类有：
+
+|实现类|线程安全|遍历顺序|是否允许键为null|其他|
+|---|---|---|---|---|
+|HashMap|非线程安全|遍历顺序不确定|最多允许一个null键|最常用|
+|Hashtable|线程安全|遍历顺序不确定|不允许null键|不建议使用，线程安全场景用ConcurrentHashMap替换|
+|LinkedHashMap|非线程安全|遍历次序为插入的顺序|最多允许一个null键|HashMap的一个子类，保存了记录的插入顺序|
+|TreeMap|非线程安全|默认顺序是键值的升序，可以指定比较器|不允许null键|TreeMap实现SortedMap接口|
+
+## HashMap
+
+HashMap是Java程序员使用频率最高的用于映射(键值对)处理的数据类型。从结构实现来讲，HashMap是数组+链表+红黑树（JDK1.8增加了红黑树部分）实现的。
+
+### 继承关系
+
+```java
+public class HashMap<K,V> extends AbstractMap<K,V>
+    implements Map<K,V>, Cloneable, Serializable {}
+```
+
+HashMap继承了AbstractMap<K,V>抽象类，实现了Map<K,V>的方法
+
+### 字段
+
+```java
+// 默认容量
+static final int DEFAULT_INITIAL_CAPACITY = 1 << 4;
+
+// 最大容量
+static final int MAXIMUM_CAPACITY = 1 << 30;
+
+// 默认加载因子
+static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+// 链表转成红黑树的阈值
+static final int TREEIFY_THRESHOLD = 8;
+
+// 红黑树转为链表的阈值
+static final int UNTREEIFY_THRESHOLD = 6;
+
+// 存储方式由链表转成红黑树的容量的最小阈值
+static final int MIN_TREEIFY_CAPACITY = 64;
+
+/* ---------------- Fields -------------- */
+
+// 哈希桶数组，用于存放数据
+transient Node<K,V>[] table;
+
+//
+transient Set<Map.Entry<K,V>> entrySet;
+
+// HashMap中存储的键值对的数量
+transient int size;
+
+// 修改次数
+transient int modCount;
+
+// 扩容阈值，当size>=threshold时，就会扩容
+int threshold;
+
+// 负载因子
+final float loadFactor;
+```
+
+### Node
+
+Node是HashMap的一个内部类，实现了Map.Entry接口，本质是一个映射(键值对)，封装了Key和Value
+
+```java
+static class Node<K,V> implements Map.Entry<K,V> {
+    final int hash; // 用于定位数组索引位置
+    final K key;
+    V value;
+    Node<K,V> next; // 链表的下一个Node
+
+    Node(int hash, K key, V value, Node<K,V> next) {
+        this.hash = hash;
+        this.key = key;
+        this.value = value;
+        this.next = next;
+    }
+
+    public final K getKey()        { return key; }
+    public final V getValue()      { return value; }
+    public final String toString() { return key + "=" + value; }
+
+    public final int hashCode() {
+        return Objects.hashCode(key) ^ Objects.hashCode(value);
+    }
+
+    public final V setValue(V newValue) {
+        V oldValue = value;
+        value = newValue;
+        return oldValue;
+    }
+
+    public final boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (o instanceof Map.Entry) {
+            Map.Entry<?,?> e = (Map.Entry<?,?>)o;
+            if (Objects.equals(key, e.getKey()) &&
+                Objects.equals(value, e.getValue()))
+                return true;
+        }
+        return false;
+    }
+}
+```

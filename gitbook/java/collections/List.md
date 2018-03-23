@@ -97,7 +97,7 @@ catch (UnsupportedOperationException e)
 
 ## ArrayList
 
-ArrayList估计是平时开发过程中用到最多的容器了。故名思意，ArrayList是使用数组实现的列表容器，接下来就具体分析下ArrayList的内部实现原理。
+ArrayList估计是平时开发过程中用到最多的容器了。顾名思义，ArrayList是使用数组实现的列表容器，接下来就具体分析下ArrayList的内部实现原理。
 
 ### 继承关系
 
