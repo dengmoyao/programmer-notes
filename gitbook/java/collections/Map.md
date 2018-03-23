@@ -22,9 +22,9 @@ public interface Map<K,V> {}
 |V|put(K key, V value)|将指定的值与此映射中的指定键关联|
 |V|remove(Object key)|如果存在一个键的映射关系，则将其从此映射中移除|
 |void|putAll(Map<? extends K, ? extends V> m)|从指定映射中将所有映射关系复制到此映射中|
-|Set<K>|keySet()|回此映射中包含的键的Set|
-|Collection<V>|values()|返回此映射中包含的值的 Collection|
-|Set<Map.Entry<K, V>>|entrySet()|返回此映射中包含的映射关系的 Set |
+|`Set<K>`|keySet()|回此映射中包含的键的Set|
+|`Collection<V>`|values()|返回此映射中包含的值的 Collection|
+|`Set<Map.Entry<K, V>>`|entrySet()|返回此映射中包含的映射关系的 Set |
 
 ### JDK 8 后新增方法
 
@@ -367,7 +367,42 @@ int threshold;
 final float loadFactor;
 ```
 
-### Node
+### 构造器
+
+```java
+// 指定初始容量和负载因子
+public HashMap(int initialCapacity, float loadFactor) {
+    if (initialCapacity < 0)
+        throw new IllegalArgumentException("Illegal initial capacity: " +
+                                            initialCapacity);
+    if (initialCapacity > MAXIMUM_CAPACITY)
+        initialCapacity = MAXIMUM_CAPACITY;
+    if (loadFactor <= 0 || Float.isNaN(loadFactor))
+        throw new IllegalArgumentException("Illegal load factor: " +
+                                            loadFactor);
+    this.loadFactor = loadFactor;
+    this.threshold = tableSizeFor(initialCapacity);
+}
+
+// 指定初始容量，负载因子为默认值(0.75)
+public HashMap(int initialCapacity) {
+    this(initialCapacity, DEFAULT_LOAD_FACTOR);
+}
+
+// 无参数构造器，初始容量为默认值(16)，负载因子为默认值(0.75)
+public HashMap() {
+    this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
+}
+
+public HashMap(Map<? extends K, ? extends V> m) {
+    this.loadFactor = DEFAULT_LOAD_FACTOR;
+    putMapEntries(m, false);
+}
+```
+
+由源码可以看出，HashMap的构造函数其实就是对loadFactor和threshold赋值的过程。
+
+### Node--存放数据的内部类
 
 Node是HashMap的一个内部类，实现了Map.Entry接口，本质是一个映射(键值对)，封装了Key和Value
 
@@ -410,5 +445,87 @@ static class Node<K,V> implements Map.Entry<K,V> {
         }
         return false;
     }
+}
+```
+
+### hash--确定hash桶数组索引位置
+
+Hash，一般翻译做“散列”，就是把任意长度的输入，通过散列算法，变换成固定长度的输出，该输出就是散列值。
+
+根据同一散列函数计算出的散列值如果不同，那么输入值肯定也不同。但是，根据同一散列函数计算出的散列值如果相同，输入值不一定相同。
+
+__两个不同的输入值，根据同一散列函数计算出的散列值相同的现象叫做碰撞__
+
+HashMap就是使用哈希表来存储的，为了解决碰撞，HashMap采用了链地址法，hash桶数组中每个元素都是一个链表。hash函数就是用于数据在数组中的索引，为了数据在hash桶中分布均匀，Jdk 8中使用hashCode()的高16位异或低16位来实现的：
+
+```java
+static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
+```
+
+### put
+
+```java
+public V put(K key, V value) {
+    // 这里通过hash函数计算key的hash值
+    return putVal(hash(key), key, value, false, true);
+}
+
+final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                boolean evict) {
+    Node<K,V>[] tab; Node<K,V> p; int n, i;
+    // 1. 判断tab（hash桶数组）为空时，扩容
+    if ((tab = table) == null || (n = tab.length) == 0)
+        n = (tab = resize()).length;
+    // 2. 计算索引i，并获取i位置上的头节点p，若p为null，直接插入新的结点
+    if ((p = tab[i = (n - 1) & hash]) == null)
+        tab[i] = newNode(hash, key, value, null);
+    else { // 索引i对应的位置上存在数据的情况
+        Node<K,V> e; K k;
+        // 3. 如果头节点p的key和插入的key一样，则覆盖p结点的value，否则进行步骤4
+        // 这里并不是直接对p的value进行赋值，而是把p赋值给e变量，e代表最后要赋值value的结点
+        // 具体把value写入到结点的操作延迟到 步骤6 完成。
+        if (p.hash == hash &&
+            ((k = p.key) == key || (key != null && key.equals(k))))
+            e = p;
+        // 4. 判断是否该链是否为红黑树，若为红黑树，调用红黑树的插入方法，否则进行步骤5
+        else if (p instanceof TreeNode)
+            e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+        // 5. 索引i处的链为链表
+        else {
+            // 遍历链表
+            for (int binCount = 0; ; ++binCount) {
+                // 若遍历到链表尾，则插入一个新结点
+                if ((e = p.next) == null) {
+                    p.next = newNode(hash, key, value, null);
+                    // 插入完成后，判断链表长度是否大于8，大于8的话把链表转换为红黑树
+                    if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                        treeifyBin(tab, hash);
+                    break;
+                }
+                // 若遍历过程中，发现key已经存在，直接覆盖
+                if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k))))
+                    break;
+                p = e;
+            }
+        }
+        // 6. 具体执行写value的动作
+        if (e != null) { // existing mapping for key
+            V oldValue = e.value;
+            if (!onlyIfAbsent || oldValue == null)
+                e.value = value;
+            afterNodeAccess(e);
+            return oldValue;
+        }
+    }
+    ++modCount;
+    // 7. 判断实际存在的键值对数量size是否超多了最大容量threshold，如果超过，进行扩容
+    if (++size > threshold)
+        resize();
+    afterNodeInsertion(evict);
+    return null;
 }
 ```
