@@ -688,7 +688,27 @@ final Node<K,V>[] resize() {
 }
 ```
 
+### HashMap遍历
+
+HashMap的遍历可以分为对key的遍历，对value的遍历，以及对entry的遍历，这些遍历底层的逻辑实现都是由HashMap中的内部类HashIterator的nextNode方法来实现的。下面是源码分析
+
+```java
+final Node<K,V> nextNode() {
+    Node<K,V>[] t;
+    Node<K,V> e = next;
+    if (modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+    if (e == null)
+        throw new NoSuchElementException();
+    // 对桶中的结点进行遍历
+    if ((next = (current = e).next) == null && (t = table) != null) {
+        // 遍历下一个桶
+        do {} while (index < t.length && (next = t[index++]) == null);
+    }
+    return e;
+}
+```
+
 ### 红黑树与TreeNode
 
 待分析
-
