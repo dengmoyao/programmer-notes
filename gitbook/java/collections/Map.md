@@ -1,8 +1,10 @@
 # Map
 
+__源码均基于JDK 8__
+
 ## Map概述
 
-Map是Java提供的映射容器，Map接口定义了一个保存key-value的对象，该对象中key值是不存在重复的，每个key值至多对应一个value
+Map是Java提供的映射容器，Map接口定义了一个保存key-value的对象，该对象中key值是不存在重复的，每个key值至多对应一个value。
 
 接口定义：
 
@@ -456,7 +458,7 @@ Hash，一般翻译做“散列”，就是把任意长度的输入，通过散�
 
 __两个不同的输入值，根据同一散列函数计算出的散列值相同的现象叫做碰撞__
 
-HashMap就是使用哈希表来存储的，为了解决碰撞，HashMap采用了链地址法，hash桶数组中每个元素都是一个链表。hash函数就是用于数据在数组中的索引，为了数据在hash桶中分布均匀，Jdk 8中使用hashCode()的高16位异或低16位来实现的：
+HashMap就是使用哈希表来存储的，为了解决碰撞，HashMap采用了链地址法，哈希桶数组中每个元素都是一个链表。hash函数就是用于计算数据在哈希桶数组中的索引，为了数据在哈希桶中分布均匀，Jdk 8中使用了hashCode()的高16位异或低16位来实现：
 
 ```java
 static final int hash(Object key) {
@@ -465,7 +467,59 @@ static final int hash(Object key) {
 }
 ```
 
-### put
+对key进行hash之后，再对hash值取模即可得到key对应的数组索引，JDK中并不是直接使用模运算符来计算，而是使用了性能更好的与运算来替代，能这样替代的原因是，Hash桶数组的大小都是2的n次幂
+
+```java
+int i = (table.length - 1) & hash;
+```
+
+### get--指定key快速查找
+
+HashMap中get方法用于获取指定Key的Value，如果map中没有对应的键值映射，则返回null。
+
+下面是HashMap get方法的源码分析：
+
+```java
+public V get(Object key) {
+    Node<K,V> e;
+    // 计算key的hash值，并调用getNode方法在map中查找key
+    return (e = getNode(hash(key), key)) == null ? null : e.value;
+}
+
+final Node<K,V> getNode(int hash, Object key) {
+    Node<K,V>[] tab; Node<K,V> first, e; int n; K k;
+    // 这里有三个判断条件与，任意一个为false都代表table中不可能存在key的映射
+    // a. table 不为null
+    // b. table的length 大于 0
+    // c. key的hash值计算出的索引在table中对应的头节点不为null
+    if ((tab = table) != null && (n = tab.length) > 0 &&
+        (first = tab[(n - 1) & hash]) != null) {
+        // 这里已经找到了key的hash值对应链的首结点，首先判断首结点的key和要查找的key是否相等
+        if (first.hash == hash && // always check first node
+            ((k = first.key) == key || (key != null && key.equals(k))))
+            return first;
+        // 从首结点的后继节点开始遍历
+        if ((e = first.next) != null) {
+            // 如果是红黑树，则调用红黑树的查找方法
+            if (first instanceof TreeNode)
+                return ((TreeNode<K,V>)first).getTreeNode(hash, key);
+            // 如果是链表，直接遍历链表，找到了相等的key就返回对应的value
+            do {
+                if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k))))
+                    return e;
+            } while ((e = e.next) != null);
+        }
+    }
+    return null;
+}
+```
+
+### put--插入新的映射关系
+
+HashMap中的方法用于向map容器中插入映射(键值对)，如果key在map中已经存在了，则会用新的值替换旧值。
+
+HashMap put方法源码分析如下
 
 ```java
 public V put(K key, V value) {
@@ -529,3 +583,112 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
     return null;
 }
 ```
+
+### resize--扩容机制
+
+不停向HashMap中添加元素，当HashMap对象内部的数组无法装载更多的元素时，对象就需要扩大内部数组的长度，以便能装入更多的元素。
+
+HashMap中使用resize()函数来完成扩容动作，下面是源码分析：
+
+```java
+final Node<K,V>[] resize() {
+    Node<K,V>[] oldTab = table;
+    // 这里将当前容量赋值给oldCap， 当前阈值赋值给oldThr
+    int oldCap = (oldTab == null) ? 0 : oldTab.length;
+    int oldThr = threshold;
+    int newCap, newThr = 0;
+    // 此分支对应HashMap已经完成了初次扩容的情况
+    if (oldCap > 0) {
+        // 超过最大值，就不再扩充了
+        if (oldCap >= MAXIMUM_CAPACITY) {
+            threshold = Integer.MAX_VALUE;
+            return oldTab;
+        }
+        // 没有超过最大值，就扩充为原来的2倍
+        else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
+                    oldCap >= DEFAULT_INITIAL_CAPACITY)
+            newThr = oldThr << 1; // double threshold
+    }
+    // 此分支对应指定初始容量构造HashMap首次扩容的情况
+    // 指定初始容量构造HashMap会将计算出来的容量(2的n次幂)赋值给threshold
+    else if (oldThr > 0) // initial capacity was placed in threshold
+        newCap = oldThr;
+    // 此分支对应无参数构造HashMap首次扩容的情况
+    else {               // zero initial threshold signifies using defaults
+        newCap = DEFAULT_INITIAL_CAPACITY;
+        newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+    }
+    // 计算新的扩容阈值
+    if (newThr == 0) {
+        float ft = (float)newCap * loadFactor;
+        newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
+                    (int)ft : Integer.MAX_VALUE);
+    }
+    threshold = newThr;
+    // 这里开始创建新的哈希桶数组
+    @SuppressWarnings({"rawtypes","unchecked"})
+        Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
+    table = newTab;
+    if (oldTab != null) {
+        //  把每个bucket都移动到新的bucket中
+        for (int j = 0; j < oldCap; ++j) {
+            Node<K,V> e;
+            if ((e = oldTab[j]) != null) {
+                // 避免游离
+                oldTab[j] = null;
+                // bucket中首结点无后继结点，直接重新计算该结点在新数组中的索引，并放入新数组中
+                if (e.next == null)
+                    newTab[e.hash & (newCap - 1)] = e;
+                // bucket中是红黑树，调用红黑树中分割方法
+                else if (e instanceof TreeNode)
+                    ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+                else { // preserve order
+                    // 链表优化的重计算索引的过程，这里会将原来的链表中所有结点分到新的两条链表中，lo和high
+                    // 这没用求模(与n-1)的方式计算新索引，而是看hash值在原mask范围的高一位是0还是1来判断新索引的
+                    // a. 若为0，新索引仍保持不变(结点加入lo链表)，
+                    // b. 若为1，新索引为原索引+oldCap(结点加入hi链表)
+                    Node<K,V> loHead = null, loTail = null;
+                    Node<K,V> hiHead = null, hiTail = null;
+                    Node<K,V> next;
+                    do {
+                        next = e.next;
+                        // a. 原索引
+                        if ((e.hash & oldCap) == 0) {
+                            if (loTail == null)
+                                loHead = e;
+                            else
+                                loTail.next = e;
+                            loTail = e;
+                        }
+                        // b. 原索引+oldCap
+                        else {
+                            if (hiTail == null)
+                                hiHead = e;
+                            else
+                                hiTail.next = e;
+                            hiTail = e;
+                        }
+                    } while ((e = next) != null);
+                    // lo链表放入新数组中，索引为原索引
+                    if (loTail != null) {
+                        // 新链表尾结点可能为原链表中的中间结点，需要把尾结点的后继结点置为null
+                        loTail.next = null;
+                        newTab[j] = loHead;
+                    }
+                    // high链表放入新数组中，索引为原索引+oldCap
+                    if (hiTail != null) {
+                        hiTail.next = null;
+                        newTab[j + oldCap] = hiHead;
+                    }
+                }
+            }
+        }
+    }
+    return newTab;
+}
+```
+
+### 红黑树与TreeNode
+
+待分析
+
