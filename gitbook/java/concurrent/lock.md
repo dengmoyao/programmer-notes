@@ -392,3 +392,206 @@ private void doReleaseShared() {
     }
 }
 ```
+
+## 重入锁(ReentrantLock)
+
+重入锁ReentrantLock，就是支持重入的锁，表示该锁支持一个线程对资源的重复加锁。除此之外，还支持获取锁时公平和非公平性选择。公平锁是指等待时间最长的线程最优先获取锁。公平锁的机制往往没有非公平锁的效率高。
+
+### 类图
+
+{% plantuml %}
+interface Lock
+abstract class AbstractQueuedSynchronizer
+abstract class Sync
+class ReentrantLock
+
+Lock <|.. ReentrantLock
+ReentrantLock *-- Sync
+AbstractQueuedSynchronizer <|-- Sync
+
+class FairSync
+class NonfairSync
+Sync <|-- FairSync
+Sync <|-- NonfairSync
+{% endplantuml %}
+
+*plantuml*
+
+```plantuml
+interface Lock
+abstract class AbstractQueuedSynchronizer
+abstract class Sync
+class ReentrantLock
+
+Lock <|.. ReentrantLock
+ReentrantLock *-- Sync
+AbstractQueuedSynchronizer <|-- Sync
+
+class FairSync
+class NonfairSync
+Sync <|-- FairSync
+Sync <|-- NonfairSync
+```
+Sync为ReentrantLock里面的一个内部类，它继承AQS（AbstractQueuedSynchronizer），它有两个子类：公平锁FairSync和非公平锁NonfairSync。
+
+### 获取锁
+
+通过调用ReentrantLock的lock()方法可以获取锁：
+
+```java
+public void lock() {
+    sync.lock();
+}
+```
+
+ReentrantLock里面大部分的功能都是委托给Sync来实现的，同时Sync内部定义了lock()抽象方法由其子类去实现。
+
+#### 非公平锁实现
+
+```java
+// NonfairSync中的lock方法
+final void lock() {
+    // 首先会第一次尝试快速获取锁
+    if (compareAndSetState(0, 1))
+        setExclusiveOwnerThread(Thread.currentThread());
+    else // 获取失败
+        //调用AQS中的acquire(int arg)方法
+        acquire(1);
+}
+
+// AQS中的acquire方法
+public final void acquire(int arg) {
+    // 调用子类中实现的tryAcquire
+    if (!tryAcquire(arg) &&
+        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        selfInterrupt();
+}
+
+// NonfairSync中的tryAcquire方法
+protected final boolean tryAcquire(int acquires) {
+    return nonfairTryAcquire(acquires);
+}
+
+// Sync中的nonfairTryAcquire方法
+final boolean nonfairTryAcquire(int acquires) {
+    // 获取当前线程
+    final Thread current = Thread.currentThread();
+    // 获取同步状态
+    int c = getState();
+    if (c == 0) { // 0表示没有该锁，处于空闲状态
+        // 获取锁成功，设置为当前线程所有
+        if (compareAndSetState(0, acquires)) {
+            setExclusiveOwnerThread(current);
+            return true;
+        }
+    }
+    // 判断重入，查看持有锁的线程是否为当前线程
+    else if (current == getExclusiveOwnerThread()) {
+        int nextc = c + acquires;
+        if (nextc < 0) // overflow
+            throw new Error("Maximum lock count exceeded");
+        setState(nextc);
+        return true;
+    }
+    return false;
+}
+```
+
+#### 公平锁实现
+
+```java
+// FairSync中的lock方法（和非公平锁有区别）
+final void lock() {
+    // 调用AQS中的acquire(int arg)方法
+    acquire(1);
+}
+
+// AQS中的acquire方法
+public final void acquire(int arg) {
+    // 调用子类中实现的tryAcquire
+    if (!tryAcquire(arg) &&
+        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        selfInterrupt();
+}
+
+// FairSync中的tryAcquire方法
+protected final boolean tryAcquire(int acquires) {
+    // 获取当前线程
+    final Thread current = Thread.currentThread();
+    // 获取同步状态
+    int c = getState();
+    if (c == 0) {
+        // 此处和非公平锁有区别
+        // 公平锁只有等待前驱线程获取并释放锁之后才能继续获取锁
+        if (!hasQueuedPredecessors() &&
+            compareAndSetState(0, acquires)) {
+            setExclusiveOwnerThread(current);
+            return true;
+        }
+    }
+    else if (current == getExclusiveOwnerThread()) {
+        int nextc = c + acquires;
+        if (nextc < 0)
+            throw new Error("Maximum lock count exceeded");
+        setState(nextc);
+        return true;
+    }
+    return false;
+}
+
+// AQS中的hasQueuedPredecessors方法
+/* 判断当前线程是否位于同步队列中的第一个。如果是则返回true，否则返回false */
+public final boolean hasQueuedPredecessors() {
+    Node t = tail; // Read fields in reverse initialization order
+    Node h = head;
+    Node s;
+    //头节点 != 尾节点
+    //同步队列第一个节点不为null
+    //当前线程是同步队列第一个节点
+    return h != t &&
+        ((s = h.next) == null || s.thread != Thread.currentThread());
+}
+```
+
+公平锁与非公平锁的区别在于获取锁的时候是否按照FIFO的顺序来。
+
+### 释放锁
+
+ReentrantLock使用unlock()方法释放锁：
+
+```java
+public void unlock() {
+    // 调用Sync(AQS)中的release方法
+    sync.release(1);
+}
+
+// AQS中的release方法
+public final boolean release(int arg) {
+    // 调用子类实现的tryRelease方法
+    if (tryRelease(arg)) {
+        Node h = head;
+        if (h != null && h.waitStatus != 0)
+            unparkSuccessor(h);
+        return true;
+    }
+    return false;
+}
+
+// Sync中的tryRelease的方法
+protected final boolean tryRelease(int releases) {
+    // 减掉releases
+    int c = getState() - releases;
+    // 如果释放的不是持有锁的线程，抛出异常
+    if (Thread.currentThread() != getExclusiveOwnerThread())
+        throw new IllegalMonitorStateException();
+    boolean free = false;
+    //state == 0 表示已经释放完全了，其他线程可以获取同步状态了
+    if (c == 0) {
+        // 只有当同步状态彻底释放后该方法才会返回true
+        free = true;
+        setExclusiveOwnerThread(null);
+    }
+    setState(c);
+    return free;
+}
+```
