@@ -95,11 +95,14 @@ static final class Node {
     static final Node SHARED = new Node(); // 共享
     static final Node EXCLUSIVE = null; // 独占
 
-    /** 该节点的线程可能由于超时或被中断而处于被取消(作废)状态,一旦处于这个状态,节点状态将一直处于CANCELLED(作废),因此应该从队列中移除 */
+    /** 该节点的线程可能由于超时或被中断而处于被取消(作废)状态,
+    一旦处于这个状态,节点状态将一直处于CANCELLED(作废),因此应该从队列中移除 */
     static final int CANCELLED =  1;
-    /** 当前节点为SIGNAL时,后继节点会被挂起,因此在当前节点释放锁或被取消之后必须被唤醒(unparking)其后继结点 */
+    /** 当前节点为SIGNAL时,后继节点会被挂起,
+    因此在当前节点释放锁或被取消之后必须被唤醒(unparking)其后继结点 */
     static final int SIGNAL    = -1;
-    /** 该节点的线程处于等待条件状态,不会被当作是同步队列上的节点,直到被唤醒(signal),设置其值为0,重新进入阻塞状态 */
+    /** 该节点的线程处于等待条件状态,不会被当作是同步队列上的节点,
+    直到被唤醒(signal),设置其值为0,重新进入阻塞状态 */
     static final int CONDITION = -2;
     /** 表示下一次共享式同步状态获取将会无条件地传播下去 */
     static final int PROPAGATE = -3;
@@ -231,7 +234,8 @@ final boolean acquireQueued(final Node node, int arg) {
                 failed = false;
                 return interrupted;
             }
-            //获取失败，则判断是否应该挂起,而这个判断则得通过它的前驱节点的waitStatus来确定--具体后面介绍
+            //获取失败，则判断是否应该挂起,
+            //而这个判断则得通过它的前驱节点的waitStatus来确定--具体后面介绍
             if (shouldParkAfterFailedAcquire(p, node) &&
                     parkAndCheckInterrupt())
                 interrupted = true;
@@ -247,7 +251,8 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
     if (ws == Node.SIGNAL)
         /*
         * SIGNAL,则返回true表示应该挂起当前线程,挂起该线程,并等待被唤醒,
-        * 被唤醒后进行中断检测,如果发现当前线程被中断，那么抛出InterruptedException并退出循环
+        * 被唤醒后进行中断检测,如果发现当前线程被中断，
+        * 那么抛出InterruptedException并退出循环
         */
         return true;
     if (ws > 0) {
@@ -257,7 +262,8 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
         } while (pred.waitStatus > 0);
         pred.next = node;
     } else {
-        // <0,也是返回false,不过先将前驱节点waitStatus设置为SIGNAL,使得下次判断时,将当前节点挂起
+        // <0,也是返回false,不过先将前驱节点waitStatus设置为SIGNAL,
+        // 使得下次判断时,将当前节点挂起
         compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
     }
     return false;
@@ -313,7 +319,8 @@ private void unparkSuccessor(Node node) {
 
 ```java
 public final void acquireShared(int arg) {
-    if (tryAcquireShared(arg) < 0) // 共享式获取同步状态的标志是返回 >= 0 的值表示获取成功
+    // 共享式获取同步状态的标志是返回 >= 0 的值表示获取成功
+    if (tryAcquireShared(arg) < 0) 
         //获取失败，自旋获取同步状态
         doAcquireShared(arg);
 }
@@ -365,7 +372,8 @@ public final boolean releaseShared(int arg) {
 }
 
 private void doReleaseShared() {
-    // 为确保同步状态线程安全释放，通过循环和CAS来保证（因为释放同步状态的操作会同时来自多个线程）
+    // 为确保同步状态线程安全释放，通过循环和CAS来保证
+    // （因为释放同步状态的操作会同时来自多个线程）
     for (;;) {
         Node h = head;
         if (h != null && h != tail) {
