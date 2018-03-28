@@ -393,7 +393,7 @@ private void doReleaseShared() {
 }
 ```
 
-## 重入锁(ReentrantLock)
+## 重入锁--ReentrantLock
 
 重入锁ReentrantLock，就是支持重入的锁，表示该锁支持一个线程对资源的重复加锁。除此之外，还支持获取锁时公平和非公平性选择。公平锁是指等待时间最长的线程最优先获取锁。公平锁的机制往往没有非公平锁的效率高。
 
@@ -594,4 +594,57 @@ protected final boolean tryRelease(int releases) {
     setState(c);
     return free;
 }
+```
+
+## 读写锁--ReentrantReadWriteLock
+
+重入锁ReentrantLock是排他锁，在同一时刻仅有一个线程可以访问。在读多写少的场景下，读服务不存在数据竞争问题，如果一个线程在读时禁止其他线程读势必会导致性能降低。因此提供了读写锁。
+
+读写锁维护着一对锁，一个读锁和一个写锁。通过分离读锁和写锁，使得并发性比一般的排他锁有了较大的提升：在同一时间可以允许多个读线程同时访问，但是在写线程访问时，所有读线程和写线程都会被阻塞。
+
+JDK中读写锁的接口是ReadWriteLock：
+
+```java
+public interface ReadWriteLock {
+    Lock readLock(); // 返回读锁
+    Lock writeLock(); // 返回写锁
+}
+```
+
+JUC中读写锁的实现是ReentrantReadWriteLock，提供了如下的特性：
+
+1. 公平性选择： 支持非公平（默认）和公平的锁获取方式，吞吐量非公平优于公平
+2. 重入： 该锁支持重入
+3. 锁降级： 遵循获取写锁、获取读锁在释放写锁的次序，写锁能够降级成为读锁
+
+### 源码分析
+
+```java
+ /** 内部类  读锁 */
+private final ReentrantReadWriteLock.ReadLock readerLock;
+/** 内部类  写锁 */
+private final ReentrantReadWriteLock.WriteLock writerLock;
+/** 内部类， AQS的子类 */
+final Sync sync;
+
+/**
+使用默认（非公平）的排序属性创建一个新的 ReentrantReadWriteLock
+*/
+public ReentrantReadWriteLock() {
+    this(false);
+}
+
+/**
+* 使用给定的公平策略创建一个新的 ReentrantReadWriteLock
+*/
+public ReentrantReadWriteLock(boolean fair) {
+    sync = fair ? new FairSync() : new NonfairSync();
+    readerLock = new ReadLock(this);
+    writerLock = new WriteLock(this);
+}
+
+/** 返回用于写入操作的锁 */
+public ReentrantReadWriteLock.WriteLock writeLock() { return writerLock; }
+/** 返回用于读取操作的锁 */
+public ReentrantReadWriteLock.ReadLock  readLock()  { return readerLock; }
 ```
