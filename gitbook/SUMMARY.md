@@ -17,6 +17,7 @@
         * [类文件结构](java/jvm/ClassFile.md)
     * [扩展内容]()
         * [Servlet](java/extends/servlet.md)
+        * [JDBC](java/extends/JDBC.md)
 
 * [数据结构与算法]()
     * [基础数据结构]()
