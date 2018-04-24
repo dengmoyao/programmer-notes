@@ -28,6 +28,8 @@
 * [框架&工具]()
     * [Spring]()
         * [Spring基础知识](framework/spring/springBasics.md)
+    * [MySQL]()
+        * [MySQL基础知识](framework/mysql/brief.md)
 
 * [编程思想]()
     * [设计模式]()
