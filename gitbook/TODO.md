@@ -9,14 +9,14 @@
 #### 集合
 - [x] Java集合框架概述
 - [x] List
-- [ ] Map
+- [x] Map
 - [ ] Set
 
 #### 并发
 - [x] 线程
 - [x] JMM
 - [x] synchronized与volatile
-- [ ] 显示锁
+- [x] 显示锁
 - [ ] 并发容器和工具类
 - [ ] 原子操作类
 - [ ] 线程池和Excutor框架
