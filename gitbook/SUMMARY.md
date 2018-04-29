@@ -31,7 +31,7 @@
 
 * [数据库]()
     * [MySQL]()
-        * [MySQL基础知识](framework/mysql/brief.md)
+        * [MySQL基础知识](db/mysql/brief.md)
 
 * [编程思想]()
     * [设计模式]()
