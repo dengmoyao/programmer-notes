@@ -10,7 +10,6 @@
 - [x] Java集合框架概述
 - [x] List
 - [x] Map
-- [ ] Set
 
 #### 并发
 - [x] 线程
@@ -32,7 +31,7 @@
 #### 基础数据结构
 - [x] 链表
 - [x] 栈和队列
-- [ ] 树
+- [x] 树
 - [ ] 图
 
 #### 常用算法
@@ -44,10 +43,17 @@
 
 #### Spring
 
+- [ ] Spring基础知识
+- [ ] Spring IOC
+- [ ] Spring AOP
+- [ ] Spring 事务
+
 ## 数据库
 
-#### SQL
-#### NoSQL
+#### MySQL
+
+- [x] MySQL基础知识
+- [ ] MySQL优化原理
 
 ## 网络
 
