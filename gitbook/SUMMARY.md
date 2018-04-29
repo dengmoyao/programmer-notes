@@ -15,6 +15,7 @@
     * [JVM]()
         * [JVM内存区域](java/jvm/Mem.md)
         * [类文件结构](java/jvm/ClassFile.md)
+        * [类加载机制](java/jvm/ClassLoad.md)
     * [扩展内容]()
         * [Servlet](java/extends/servlet.md)
         * [JDBC](java/extends/JDBC.md)
