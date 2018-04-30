@@ -96,3 +96,37 @@ __符号引用 vs 直接引用__
 + `<clinit>()`方法对于类和接口来说并不是必须的，如果没有静态语句块也没有对变量的赋值操作，那么编译器可以不为这个类生成`<clinit>()`方法
 + 接口中不能使用静态语句块，但仍然有变量初始化的赋值操作
 + 虚拟机会保证一个类的`<clinit>()`方法在多线程环境下被正确地加锁、同步
+
+## 类加载器
+
+把类加载阶段中的“通过一个类的全限定名来获取描述此类的二进制字节流”这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需要的类。实现这个动作的代码模块称为“类加载器”。简而言之，就是负责读取 Java 字节代码，并转换成java.lang.Class类的一个实例。
+
+### 类和类加载器
+
+对于任意一个类，都需要有加载它的类加载器和这个类本身一同确认其在Java虚拟机中的唯一性。即便是同样的字节码，被不同的类加载器加载之后得到的类也是不同的。
+
+这里的相同包括类的Class对象的`equals()`方法、`isAssignableFrom()`方法、`isInstance()`方法、`instanceof`关键字等判断出来的结果。
+
+### 类加载器种类
+
++ 启动类加载器(Bootstrap ClassLoader): 加载Java核心库(`<JAVA_HOME>\lib`目录中的，或者被-Xbootclasspath参数所指定的路径中的类库)。C++实现
++ 扩展类加载器(Extension ClassLoader): 加载Java扩展库(`<JAVA_HOME>\lib\ext`目录中的，或者被java.ext.dirs系统变量所指定的类库)。`sun.misc.Launcher.ExtClassLoader`实现
++ 应用程序加载器(Application ClassLoader): 加载ClassPath中的类，亦称为系统加载器。`sun.misc.Launcher.AppClassLoader`实现，是`java.lang.ClassLoader#getSystemClassLoader()`的返回值，是程序中默认的类加载器
++ 自定义加载器(User ClassLoader)：通过继承ClassLoader实现，一般用于加载自定义类
+
+### 双亲委派模型
+
+双亲委派模型(Parents Delegation Model)是指，每次收到类加载请求时，先将请求委派给父类加载器完成(所有加载请求最终都会委派给顶层的Bootstrap ClassLoader加载器中)，如果父类加载器无法完成这个加载(该加载器的搜索范围中没有找到对应的类)，子类尝试自己加载。
+
+![](img/parents-delegation-model.png)
+
+双亲委派的好处：
+
++ 避免同一个类多次加载
++ 每个加载器只能加载自己范围内的类
+
+### 自定义类加载器
+
+要创建用户的自己的类加载器，只需要继承`java.lang.ClassLoader`类，然后覆写`findClass(String name)`方法即可，即指明如何获取类的字节码流。
+
+如果要符合双亲委派规范，则重写findClass方法（用户自定义类加载逻辑）；要破坏的话，重写loadClass方法(双亲委派的具体逻辑实现)。
