@@ -24,7 +24,7 @@
 - [x] JVM内存区域
 - [ ] GC
 - [x] 类文件结构
-- [ ] 类加载机制
+- [x] 类加载机制
 
 ## 数据结构与算法
 
@@ -47,6 +47,10 @@
 - [ ] Spring IOC
 - [ ] Spring AOP
 - [ ] Spring 事务
+
+#### MyBatis
+
+- [ ] MyBatis基础知识
 
 ## 数据库
 
