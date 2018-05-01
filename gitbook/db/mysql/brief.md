@@ -69,6 +69,44 @@ InnoDB的MVCC，是通过在每行记录后面保存两个隐藏的列来实现�
 + DELETE: 保存当前事务版本号为行的删除版本号
 + UPDATE: 插入一条新的记录，保存当前事务版本号为行创建版本号，同时保存当前事务版本号到原来删除的行
 
+### 索引
+
+索引是存储引擎用于快速找到记录的一种数据结构。索引是存储引擎层面实现的，不是server层面，不是所有的存储引擎都支持所有的索引类型。在MySQL中，索引按照不同角度来看，有如下的分类方式：
+
+__按数据结构角度__
+
++ B+树索引，最常见的索引
++ Hash索引，基于Hash表，只支持精确查找('=', 'IN', '<>')，不支持范围，不支持排序
++ 全文索引(FULLTEXT)，主要用来查找文本中的关键字，而不是直接与索引中的值相比较，配合MATCH AGAINST使用
++ R-Tree索引，不常用
+
+__按物理存储角度__
+
++ 聚集索引(clustered index)
++ 非聚集索引(non-clustered index)
+
+__按逻辑角度__
+
++ 主键索引，主键索引是一种特殊的唯一索引，不允许有空值
++ 普通索引(单列索引)
++ 多列索引(符合索引)，指多个字段上创建的索引，使用复合索引时遵循最左前缀集合
++ 唯一索引或非唯一索引
++ 空间索引
+
+创建索引的语法：
+
+```SQL
+CREATE TABLE table_name[col_name data type]
+[unique|fulltext|spatial][index|key][index_name](col_name[length])[asc|desc]
+```
+
+1. unique|fulltext|spatial为可选参数，分别表示唯一索引、全文索引和空间索引；
+2. index和key为同义词，两者作用相同，用来指定创建索引
+3. col_name为需要创建索引的字段列，该列必须从数据表中该定义的多个列中选择；
+4. index_name指定索引的名称，为可选参数，如果不指定，MYSQL默认col_name为索引值；
+5. length为可选参数，表示索引的长度，只有字符串类型的字段才能指定索引长度；
+6. asc或desc指定升序或降序的索引值存储
+
 ## 参考资料
 
 + [《高性能MySQL(第3版)》 - 施瓦茨 (Baron Schwartz)](https://www.amazon.cn/dp/B00C1W58DE/ref=pd_cp_14_1?_encoding=UTF8&psc=1&refRID=EYMHA4NXBBPTXZS81NMY)
