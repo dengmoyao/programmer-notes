@@ -68,3 +68,7 @@ InnoDB的MVCC，是通过在每行记录后面保存两个隐藏的列来实现�
 + INSERT: 保存当前事务版本号为行的创建版本号
 + DELETE: 保存当前事务版本号为行的删除版本号
 + UPDATE: 插入一条新的记录，保存当前事务版本号为行创建版本号，同时保存当前事务版本号到原来删除的行
+
+## 参考资料
+
++ [《高性能MySQL(第3版)》 - 施瓦茨 (Baron Schwartz)](https://www.amazon.cn/dp/B00C1W58DE/ref=pd_cp_14_1?_encoding=UTF8&psc=1&refRID=EYMHA4NXBBPTXZS81NMY)
