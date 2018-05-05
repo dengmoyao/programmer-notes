@@ -99,7 +99,7 @@ Spring框架提供了以下四种方式来管理bean的生命周期事件：
 + constructor: 这个方式类似于byType， 但是要提供给构造器参数
 + autodetect：首先尝试使用constructor来自动装配，如果无法工作，则使用byType方式
 
-### AOP
+### Spring AOP
 
 #### :star2: 解释一下AOP
 
