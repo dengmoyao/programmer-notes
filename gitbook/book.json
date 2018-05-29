@@ -18,7 +18,8 @@
         "anchor-navigation-ex",
         "mermaid-gb3",
         "puml",
-        "disqus"
+        "disqus",
+        "copy-code-button"
     ],
     "pluginsConfig": {
         "prism": {
