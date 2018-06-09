@@ -34,11 +34,15 @@
 * [数据库](db/README.md)
     * [MySQL]()
         * [MySQL基础知识](db/mysql/brief.md)
+    * [Redis]()
+        * [Redis基础知识](db/redis/brief.md)
 
 * [编程思想](concept/README.md)
     * [设计模式]()
         * [适配器模式](concept/designPattern/Adapter.md)
         * [装饰器模式](concept/designPattern/Decorator.md)
+    * [面向对象]()
+        * [SOLID原则](concept/oop/SOLID.md)
 
 * [TO-DO LIST](TODO.md)
 
