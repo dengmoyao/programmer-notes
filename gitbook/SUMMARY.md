@@ -29,7 +29,6 @@
 
 * [框架&工具](framework/README.md)
     * [Spring]()
-        * [Spring基础知识](framework/spring/springBasics.md)
         * [Spring常见问题](framework/spring/questions.md)
     * [MyBatis]()
         * [MyBatis常见问题](framework/mybatis/questions.md)
