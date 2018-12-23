@@ -31,6 +31,7 @@
     * [Spring]()
         * [Spring常见问题](framework/spring/questions.md)
     * [MyBatis]()
+        * [MyBatis基础](framework/mybatis/brief.md)
         * [MyBatis常见问题](framework/mybatis/questions.md)
 
 * [数据库](db/README.md)
