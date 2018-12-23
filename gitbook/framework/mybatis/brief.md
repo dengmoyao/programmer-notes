@@ -4,7 +4,7 @@
 
 MyBatis的整体架构：
 
-![](img/mybaits.png)
+![](img/mybatis.png)
 
 ## 配置解析篇
 
