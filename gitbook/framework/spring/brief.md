@@ -47,3 +47,18 @@ ApplicationContext 子类：
 + 利用BeanFactory创建对象
 + 保存对象关系表
 + 能够捕获各种事件
+
+容器初始化重要方法：
+
++ prepareRefresh: 容器预先准备，记录容器启动时间和标记
++ obtainFreshBeanFactory: 创建bean工厂，如果已有则先销毁再重建；这里面会实现对BeanDefinition的装载
++ prepareBeanFactory： 设置BeanFactory的类加载器，添加几个BeanPostProcessor，手动注册几个特殊的bean
++ postProcessBeanFactory: 模板方法，在BeanDefinition被装载后，提供一个修改beanFactory的入口
++ invokeBeanFactoryPostProcessors: 调用 BeanFactoryPostProcessor 各个实现类的 postProcessBeanFactory(factory) 方法
++ registerBeanPostProcessors: 注册用于拦截bean实例创建过程的BeanPostProcessors
++ initMessageSource： 初始化MessageSource
++ initApplicationEventMulticaster: 初始化上下文事件广播
++ onRefresh： 模板方法。具体的子类可以在这里初始化一些特殊的 Bean（在初始化 singleton beans 之前）。
++ registerListeners： 注册事件监听器，监听器需要实现 ApplicationListener 接口。
++ finishBeanFactoryInitialization： 实例化剩下的非lazy的singleton
++ finishRefresh： 广播ContextRefreshedEvent事件，ApplicationContext 初始化完成
