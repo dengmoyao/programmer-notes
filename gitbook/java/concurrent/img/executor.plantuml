@@ -1,0 +1,27 @@
+@startuml executor
+
+package java.util.concurrent {
+    interface Runnable
+    interface Future<V>
+    interface RunnableFuture
+    class FutureTask<V>
+
+    Runnable <|-- RunnableFuture
+    Future <|-- RunnableFuture
+    RunnableFuture <|.. FutureTask
+
+    interface Executor
+    interface ExecutorService
+    abstract class AbstractExecutorService
+    class ThreadPoolExecutor
+    interface ScheduledExecutorService
+    class ScheduledThreadPoolExecutor
+
+    Executor <|-- ExecutorService
+    ExecutorService <|.. AbstractExecutorService
+    AbstractExecutorService <|-- ThreadPoolExecutor
+    ExecutorService <|-- ScheduledExecutorService
+    ThreadPoolExecutor <|-- ScheduledThreadPoolExecutor
+    ScheduledExecutorService <|.. ScheduledThreadPoolExecutor
+}
+@enduml
