@@ -25,9 +25,12 @@ Executor 框架主要包含三个部分：
 
 ### 线程池(ThreadPoolExecutor)实现原理
 
-Java 线程池主要流程：
+线程池一般由两种角色构成：多个工作线程 和 一个阻塞队列。
 
-![](img/threadpool.png)
++ 工作线程: 工作线程是一组已经处在运行中的线程，它们不断地向阻塞队列中领取任务执行。
++ 阻塞队列: 阻塞队列用于存储工作线程来不及处理的任务。当工作线程都在执行任务时，到来的新任务就只能暂时在阻塞队列中存储。
+
+Java 线程池的核心功能由 `ThreadPoolExecutor` 类实现，下面就简单看下 `ThreadPoolExecutor` 的源码
 
 #### 重要字段
 
@@ -101,6 +104,93 @@ public void execute(Runnable command) {
         reject(command);
 }
 ```
+
+execute方法主要流程如图：
+
+![](img/threadpool.png)
+
+更多详细的源码分析，可以参考这篇文章[深入理解 Java 线程池：ThreadPoolExecutor](https://juejin.im/entry/58fada5d570c350058d3aaad)
+
+### Executors
+
+Executors工厂类可以创建四种类型的线程池
+
+#### FixedThreadPool
+
+```java
+public static ExecutorService newFixedThreadPool(int nThreads) {
+    return new ThreadPoolExecutor(nThreads, nThreads,
+                                    0L, TimeUnit.MILLISECONDS,
+                                    new LinkedBlockingQueue<Runnable>());
+}
+```
+
++ 是一种固定大小的线程池，corePoolSize和maximunPoolSize都为用户设定的线程数量nThreads
++ keepAliveTime为0，意味着一旦有多余的空闲线程，就会被立即停止掉；但这里keepAliveTime无效；
++ 阻塞队列采用了无参构造的LinkedBlockingQueue，其容量是Integer.MAX_VALUE，如果任务添加过多，有内存溢出的风险
+
+#### SingleThreadExecutor
+
+```java
+public static ExecutorService newSingleThreadExecutor() {
+    return new FinalizableDelegatedExecutorService
+        (new ThreadPoolExecutor(1, 1,
+                                0L, TimeUnit.MILLISECONDS,
+                                new LinkedBlockingQueue<Runnable>()));
+}
+```
+
++ 只会创建一条工作线程处理任务，其余与FixedThreadPool一样
+
+#### CachedThreadPool
+
+```java
+public static ExecutorService newCachedThreadPool() {
+    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                    60L, TimeUnit.SECONDS,
+                                    new SynchronousQueue<Runnable>());
+}
+```
+
++ corePoolSize为0，maximumPoolSize为Integer.MAX_VALUE，意味着可以创建足够多的线程
++ keepAliveTime为60S，意味着线程空闲时间超过60S就会被杀死
++ 采用SynchronousQueue装等待的任务，这个阻塞队列没有存储空间，这意味着只要有请求到来，就必须要找到一条工作线程处理他，如果当前没有空闲的线程，那么就会再创建一条新的线程
++ 适合处理执行时间比较小的任务
+
+#### ScheduledThreadPool
+
+```java
+public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
+    return new ScheduledThreadPoolExecutor(corePoolSize);
+}
+
+public static ScheduledExecutorService newSingleThreadScheduledExecutor() {
+    return new DelegatedScheduledExecutorService
+        (new ScheduledThreadPoolExecutor(1));
+}
+```
+
++ 它接收SchduledFutureTask类型的任务，有两种提交任务的方式
+    + scheduledAtFixedRate
+    + scheduledWithFixedDelay
++ 采用DelayQueue存储等待的任务。DelayQueue内部封装了一个PriorityQueue，它会根据time的先后时间排序，若time相同则根据sequenceNumber排序；
++ 工作线程的执行过程
+    + 工作线程会从DelayQueue取已经到期的任务去执行
+    + 执行结束后重新设置任务的到期时间，再次放回DelayQueue
+
+#### WorkStealingPool
+
+```java
+public static ExecutorService newWorkStealingPool() {
+    return new ForkJoinPool
+        (Runtime.getRuntime().availableProcessors(),
+            ForkJoinPool.defaultForkJoinWorkerThreadFactory,
+            null, true);
+}
+```
+
++ Java 8 新增的方法，内部创建一个ForkJoinPool，利用Work-Stealing算法，并行地处理任务
++ 创建持有足够线程的线程池来支持给定的并行级别，并通过使用多个队列，减少竞争，支持传一个并行级别的参数，如果不传，则被设定为默认的CPU数量
 
 ## 参考资料
 

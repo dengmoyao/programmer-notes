@@ -18,7 +18,7 @@
 - [x] 显示锁
 - [ ] 并发容器和工具类
 - [ ] 原子操作类
-- [ ] 线程池和Excutor框架
+- [x] 线程池和Excutor框架
 
 #### JVM
 - [x] JVM内存区域
@@ -43,14 +43,14 @@
 
 #### Spring
 
-- [ ] Spring基础知识
+- [x] Spring基础知识
 - [ ] Spring IOC
 - [ ] Spring AOP
 - [ ] Spring 事务
 
 #### MyBatis
 
-- [ ] MyBatis基础知识
+- [x] MyBatis基础知识
 
 ## 数据库
 
