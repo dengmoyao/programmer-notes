@@ -16,7 +16,7 @@
 - [x] JMM
 - [x] synchronized与volatile
 - [x] 显示锁
-- [ ] 并发容器和工具类
+- [x] 并发容器和工具类
 - [ ] 原子操作类
 - [x] 线程池和Excutor框架
 
