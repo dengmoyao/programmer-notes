@@ -19,6 +19,7 @@
         * [原子操作类](java/concurrent/atomic.md)
     * [JVM]()
         * [JVM内存区域](java/jvm/Mem.md)
+        * [GC](java/jvm/gc.md)
         * [类文件结构](java/jvm/ClassFile.md)
         * [类加载机制](java/jvm/ClassLoad.md)
     * [扩展内容]()
