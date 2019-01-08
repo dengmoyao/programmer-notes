@@ -67,3 +67,8 @@ NIO 底层会根据操作系统选择可用的多路复用机制
 ### AIO
 
 不但等待就绪是非阻塞的，就连数据从网卡到内存都是非阻塞的
+
+## 参考资料
+
++ [Java NIO 浅析](https://tech.meituan.com/nio.html)
++ [Netty 源码笔记](https://www.kancloud.cn/ssj234/netty-source/433211)
