@@ -39,6 +39,8 @@
     * [MyBatis]()
         * [MyBatis基础](framework/mybatis/brief.md)
         * [MyBatis常见问题](framework/mybatis/questions.md)
+    * [Kafka]()
+        * [Kafka基础](framework/kafka/brief.md)
 
 * [数据库](db/README.md)
     * [MySQL]()
