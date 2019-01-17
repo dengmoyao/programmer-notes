@@ -58,5 +58,6 @@
 * [分布式]()
     * [分布式理论]()
         * [CAP理论](distributed/theory/cap.md)
+        * [BASE理论](distributed/theory/base.md)
 
 * [TO-DO LIST](TODO.md)
