@@ -1,0 +1,18 @@
+@startuml
+interface Comparable
+interface AttributeMap
+
+interface Channel
+interface ServerChannel
+
+interface ChannelPipeline
+interface ChannelConfig
+abstract class AbstractChannel
+
+Comparable <|.. Channel
+AttributeMap <|.. Channel
+Channel <|.. ServerChannel
+Channel *-- ChannelPipeline
+Channel *-- ChannelConfig
+Channel <|.. AbstractChannel
+@enduml
