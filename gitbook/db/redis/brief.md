@@ -215,4 +215,5 @@ Redis为什么不使用真实的LRU实现是因为这需要太多的内存。经
 
 ## 参考资料
 
-+ [《Redis开发与运维》]()
++ [《Redis开发与运维》](https://book.douban.com/subject/26971561/)
++ [Redis中文文档](http://www.redis.cn/documentation.html)
