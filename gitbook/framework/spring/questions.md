@@ -65,17 +65,12 @@ Spring IoC容器就是实现依赖注入的容器，负责创建对象，管理�
 
 简单来说，Bean的生命周期就是Bean从初始化到被使用，再到被销毁的过程。
 
-Bean的生命周期由两组回调（call back）方法组成。
-
-+ 初始化之后调用的回调方法。
-+ 销毁之前调用的回调方法。
-
-Spring框架提供了以下四种方式来管理bean的生命周期事件：
-
-+ InitializingBean和DisposableBean回调接口
-+ 针对特殊行为的其他Aware接口，(BeanNameAware,BeanClassLoaderAware, BeanFactoryAware)
-+ Bean配置文件中的自定义的 init()方法和destroy()方法
-+ @PostConstruct和@PreDestroy注解方式
+1. 首先是进行实例化，就是根据Bean定义实例化出一个对象来，并通过BeanWrapper进行包装
+2. 然后是依赖注入Bean的属性，这儿是借助BeanWrapper提供的方法来操作Bean的
+3. 接下来是对Bean进行初始化，初始化就是调用各种实例化后置方法，包括各种Aware接口方法，BeanPostProcessor的方法，以及init方法
+4. 完成Bean的初始化后，会按需注册一些Bean销毁的前置方法
+5. 到这一步，Bean就已经准备就绪可以使用了
+6. 对于prototype的Bean，Spring便不再管理它的生命周期了，但对于singleton的Bean，会一直驻留在Spring容器中，直到容器关闭。并且，Spring 会在容器关闭时调用Bean的销毁前置方法
 
 #### Spring Bean 的作用域是什么， 有哪些
 
