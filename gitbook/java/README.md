@@ -20,3 +20,11 @@
 ### 其他
 
 + [《写给大忙人看的Java SE 8》 - 霍斯曼 (Horstmann C.S.)](https://www.amazon.cn/dp/B00PYLOFWY/ref=pd_bxgy_14_2?_encoding=UTF8&psc=1&refRID=1PQZATG7DZHFW311Q5WF)
+
+## JVM 相关的常见问题
+
+### 类加载
+
+#### NoClassDefFoundError 和 ClassNotFoundException 区别？
+
+NoClassDefFoundError 表示该类在编译阶段还可以找到，但是在运行Java应用的时候招不到了。 ClassNotFoundException 和编译器没有什么关系，在显示的使用类名称去加载类时，便有可能抛出该受检异常。主要涉及到的方法有： Class.forName， ClassLoader.findSystemClass 和 ClassLoader.loadClass。
