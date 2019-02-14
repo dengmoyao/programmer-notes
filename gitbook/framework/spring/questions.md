@@ -165,6 +165,14 @@ TODO
 
 ### Spring 其他
 
+#### Spring 是怎么管理事务的？
+
+Spring 提供了统一一致的事务抽象，无论是全局事务还是本地事务，JTA，JDBC，Hibernate 还是 JPA，Spring 都使用统一的编程模型，使得应用程序可以很容易在全局事务与本地事务，或者不同的事务框架之间切换。
+
+PlatformTransactionManager 接口定义了事务操作行为，具体的事务处理交由子类去实现。TransactionDefinition 接口为事务属性定义，主要包括传播属性、隔离级别、超时时间和是否只读等。而 TransactionStatus 接口则是当前事务状态。
+
+Spring 事务注解本质上在事务方法上加入一个Around切面，在方法开始之前开始事务，在方法结束之后提交事务或者在抛出异常后回滚事务。
+
 #### :star2: Spring 框架中使用了哪些设计模式
 
 + 工厂模式： BeanFactory用来创建对象的实例
