@@ -21,6 +21,18 @@
 
 + [《写给大忙人看的Java SE 8》 - 霍斯曼 (Horstmann C.S.)](https://www.amazon.cn/dp/B00PYLOFWY/ref=pd_bxgy_14_2?_encoding=UTF8&psc=1&refRID=1PQZATG7DZHFW311Q5WF)
 
+## Java 常见问题
+
+### 谈谈对Java平台的理解？
+
+在我看来，Java平台主要就是Java语言和Java虚拟机。
+
+Java本身是一种面向对象的静态强类型编程语言，拥有包括反射，泛型，Lambda在内的多种高级特性，并且提供了很多易用、高性能的类库，包括IO/NIO，网络，集合框架，并发包等。
+
+Java虚拟机就是实现Java语言平台无关性的手段，Java源码通过编译器编译生成统一的字节码放到不同的Java虚拟器上去执行的。
+
+(Java生态：目前Java/JVM广泛应用在：1. Web服务器后端开发，典型的框架技术有Spring全家桶；2. 大数据开发，典型框架和技术有Hadoop，Flink，Spark姑且也算(用Scala开发的))
+
 ## JVM 相关的常见问题
 
 ### 类加载
