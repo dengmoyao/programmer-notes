@@ -25,7 +25,7 @@
     * [扩展内容]()
         * [Servlet](java/extends/servlet.md)
         * [JDBC](java/extends/JDBC.md)
-        * [常见问题](java/extends/questions.md)
+        * [Java 常见问题](java/extends/questions.md)
 
 * [数据结构与算法](dsa/README.md)
     * [基础数据结构]()
