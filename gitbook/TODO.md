@@ -44,8 +44,8 @@
 #### Spring
 
 - [x] Spring基础知识
-- [ ] Spring IOC
-- [ ] Spring AOP
+- [x] Spring IOC
+- [x] Spring AOP
 - [ ] Spring 事务
 
 #### MyBatis
@@ -63,8 +63,8 @@
 
 #### 分布式理论
 
-- [ ] CAP
-- [ ] BASE
+- [x] CAP
+- [x] BASE
 
 #### 一致性协议
 
@@ -89,6 +89,10 @@
 #### 分布式锁
 
 #### 消息队列
+
+#### 微服务
+
+- [ ] 微服务概念和特征
 
 ## 网络
 
