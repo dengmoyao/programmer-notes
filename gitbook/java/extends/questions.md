@@ -259,3 +259,56 @@ Java 的线程时不允许启动两次的，第二次调用必然会抛出`Illeg
 通常来说，我们大多是聚焦在多线程场景中的死锁，指两个或两个以上的线程之间，由于互相持有对方需要的锁，而永久处于阻塞的状态。
 
 定位死锁最常见的方式就是利用jstack等工具获取线程栈，然后定位互相的依赖关系，进而找到死锁。
+
+### Java并发包提供了哪些并发工具类？
+
+大概可以分为如下几种类型：
+
++ 提供了比 synchronized 更加高级的各种同步结构，包括 CountDownLatch、CyclicBarrier、Semaphore 和 显示锁等
++ 提供了各种线程安全的容器，比如常用的ConcurrentHashMap、CopyOnWriteArrayList，以及各种阻塞队列，并发队列等
++ 提供了各种使用方便的原子操作类，比如 AtomicInteger，AtomicLong等
++ 提供了强大的Executor框架，可以创建各种不同类型的线程池，调度任务运行等。
+
+*扩展*
+
+CountDownLatch 和 CyclicBarrier 区别？
+
+CountDownLatch 和 CyclicBarrier 都可以实现线程间的等待，只不过它们的侧重点不同：
+
++ CountDownLatch 一般用于某个线程A等待若干个其他线程执行完任务之后，它才执行。
++ CyclicBarrier 一般用于一组线程互相等待到某个状态，然后这一组线程再同时执行。
++ 另外，CountDownLatch 是不能够重用的，CyclicBarrier 是可以重用的。
+
+### Java 提供的线程池有哪几种？分别有什么特点？
+
+Java 提供了Executors静态工厂类，来简化线程池的创建过程，目前提供了5种不同的线程池：
+
++ newCachedThreadPool()，它是一种用来处理大量短时间工作任务的线程池，具有几个鲜明的特点，它会试图缓存线程并重用，当无缓存线程可用时，就会创建新的工作线程；如果线程闲置的时间超过60秒，则被终止并移除缓存；其内部使用 SynchronousQueue 作为工作队列
+
++ newFixedThreadPool(int nThreads)，重用指定数目的线程，其背后使用的是无界工作队列，任何时候最多有n个工作线程是活动的。
+
++ newSingleThreadExecutor()， 它的特点在于工作线程的数目被限制为1，操作一个无界的工作队列，所以它保证了所有的任务都是被顺序执行
+
++ newSingleThreadScheduledExecutor() 和 newScheduledThreadPool(int corePoolSize)， 创建的是个 ScheduledExecutorService，可以进行定时或周期性的工作调度，区别在于单一工作线程还是多个工作线程
+
++ newWorkStealingPool(int parallelism)， 这个是 Java 8 才加入的创建方法，其内部会构建 ForkJoinPool，利用 Work-Stealing 算法，并行地处理任务，不保证处理顺序。
+
+### AtomicInteger 底层实现原理是什么？ 如何在自己的产品代码中应用CAS操作？
+
+AtomicInteger 是对int类型的一个封装，提供原子性的访问和更新操作，其原子性操作的实现是基于CAS(compare-and-swap)技术。
+
+所谓CAS，表征的是一系列操作的集合，获取当前数值，进行一些运算，利用CAS指令试图进行更新，如果当前数值未变，代表没有其他线程进行并发修改，则成功更新。否则可能出现不同的选择，要么进行重试，要么就返回一个成功或者失败的结果。
+
+从AtomicInteger 的内部属性可以看出，它依赖于Unsafe提供的一些底层能力，进行底层操作；以 volatile 的 value 字段，记录数值，以保证可见性。Unsafe 会利用value字段的内存地址偏移，直接完成操作。
+
+### 请介绍类加载过程，什么是双亲委派模型？
+
+一般来说，Java 的类加载过程分为三个主要阶段：加载、连接、初始化。
+
+首先是加载阶段，它是虚拟机将字节码数据从不同的数据源读取到JVM中，并映射为JVM认可的数据结构(Class对象)
+
+第二阶段是连接，这一阶段可以细分为三个步骤： 一、验证，确保字节信息是符合Java虚拟机规范的；二、准备，正式为类变量分配内存并设置类变量初始值；三、解析，将常量池中的符号引用替换成直接引用
+
+第三阶段是初始化阶段，就是执行类构造器
+
+双亲委派模型： 简单来说当类加载器每次收到类加载请求时，先将请求委派给父类加载器完成(所有加载请求最终都会委派给顶层的Bootstrap ClassLoader加载器中)，如果父类加载器无法完成这个加载(该加载器的搜索范围中没有找到对应的类)，子类才尝试自己加载。使用双亲委派的好处是：一是避免同一个类多次加载，二是实现每个加载器只能加载自己范围内的类。
