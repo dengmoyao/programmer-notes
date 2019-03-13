@@ -107,6 +107,10 @@ CREATE TABLE table_name[col_name data type]
 5. length为可选参数，表示索引的长度，只有字符串类型的字段才能指定索引长度；
 6. asc或desc指定升序或降序的索引值存储
 
+### MySQL 优化
+
+参考[MySQL优化原理](http://www.cnblogs.com/zhangyinhua/p/7620964.html)
+
 ## 参考资料
 
 + [《高性能MySQL(第3版)》 - 施瓦茨 (Baron Schwartz)](https://www.amazon.cn/dp/B00C1W58DE/ref=pd_cp_14_1?_encoding=UTF8&psc=1&refRID=EYMHA4NXBBPTXZS81NMY)
